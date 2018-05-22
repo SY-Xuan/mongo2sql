@@ -1,0 +1,24 @@
+SELECT * FROM people
+SELECT user_id, status, id FROM people
+SELECT user_id, status FROM people
+SELECT * FROM people WHERE status = "A"
+SELECT user_id, status FROM people WHERE status = "A"
+SELECT * FROM people WHERE status != "A"
+SELECT * FROM people WHERE status = "A" AND age = 50
+SELECT * FROM people WHERE status = "A" OR age = 50
+SELECT * FROM people WHERE age > 25
+SELECT * FROM people WHERE (age > 25 AND age <= 50)
+SELECT * FROM people WHERE status = "A" ORDER BY user_id ASC
+SELECT * FROM people WHERE status = "A" ORDER BY user_id DSEC
+SELECT COUNT(*) FROM people
+SELECT COUNT(*) FROM people
+SELECT COUNT(user_id) FROM people
+SELECT COUNT(user_id) FROM people
+SELECT COUNT(*)FROM people WHERE age > 30
+SELECT COUNT(*)FROM people WHERE age > 30
+SELECT  DISTINCT(status) FROM people
+SELECT  DISTINCT(status) FROM people
+SELECT * FROM people LIMIT 1 
+SELECT * FROM people LIMIT 1
+SELECT * FROM people LIMIT 5 SKIP 10
+EXPLAIN SELECT * FROM people
