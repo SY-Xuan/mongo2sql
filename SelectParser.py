@@ -7,7 +7,7 @@ class SelectParser(Parser):
        
 
     def parse(self):
-        regular_expression = "^db.(([a-z]|[A-Z])+\w*.(find|aggregate|count|findOne|distinct))\(\S*\)"#使用正则检查是否有语法错误，可能需要修改
+        regular_expression = "^db.(([a-z]|[A-Z])+\w*.(find|aggregate|count|findOne|distinct))\(\S*\)(.(limit|explain|count|sort)\(\S*\))?(.skip\(\S\))?$"#使用正则检查是否有语法错误，可能需要修改
         string_need_parse = self.mongoString.replace(" ", "").replace("\n", "") #去掉字符串中的空格与换行
         print(string_need_parse)
         dbname = ""
@@ -401,7 +401,7 @@ class SelectParser(Parser):
 
 
 
-# parser = SelectParser("db.people.find().limit(5).skip(10)")
+# parser = SelectParser("db.people.find()")
 # parser = SelectParser("db.people.findOne()")
 # try:
 # print(parser.parse())
