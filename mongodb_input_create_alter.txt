@@ -1,0 +1,18 @@
+db.people.updateMany( {}, { $set: { join_date: new Date() } })
+
+db.people.insertOne( { user_id: "abc123", age: 55, status: "A" }, {writeConcern:{w:"majority",j:1,wtimeout:100}} )
+
+db.people.insertMany( [{ user_id: "abc123", age: 55, status: "A" }, {user_id:"a456", age:40, status:"B"},] , {writeConcern:{w:1,j:0,wtimeout:100}})
+
+db.createCollection("people")
+
+db.people.updateMany( {}, { $set: { join_date: 1 } })
+
+db.people.updateMany( {}, { $unset: { amount : "" } })
+
+db.people.createIndex( { user_id: 1, age: -1 } )
+
+db.people.createIndex( { user_id: 1 } )
+
+db.people.drop()
+
