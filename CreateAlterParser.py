@@ -2,13 +2,14 @@
 支持的SQL数据类型 : number ,string, date
 
 mongodb里的 insertOne 和 insertMany 在这里有完整的实现。
-mongodb里的 updateMany 在这里只实现了增加/删除列的功能，不能完整翻译到SQL的UPDATE语句。
+mongodb里的 updateMany 在这里实现了增加/删除列的功能，可以翻译到SQL的UPDATE语句（包含WHERE），但是不知道到UPDATE的翻译是否完整。
 '''
 
 from Mongo2sqlParser import Mongo2sqlParser as Parser
 import demjson
 import re
 from numbers import Number
+from parse_condition import parse_condition
 
 def mongo_type_name(v):
     if isinstance(v, Number):
@@ -143,12 +144,12 @@ class CreateAlterParser(Parser):
         if len(condition)==0:
             stat += ';\n'
         else:
-            raise ValueError('There cannot be conditions when altering table')
+            stat += '\nWHERE ' + parse_condition(condition) + ';\n'
         return stat
 
     def parseUpdateMany(self, db_name, arg):
         '''
-        arg: {...}, { $set: { join_date: new Date() } }
+        arg: "{condition}, { $set: { join_date: new Date() } }"
         '''
         json_obj = demjson.decode('['+arg+']')
         if len(json_obj)!=2 and len(json_obj)!=3:
@@ -158,10 +159,9 @@ class CreateAlterParser(Parser):
         else:
             extra_param = None
         condition = json_obj[0]
+        sql_condition_str = parse_condition(condition)
         final_statement = ""
         if '$set' in json_obj[1]:
-            if len(condition) > 0 :
-                raise ValueError('cannot add column with conditions')
             updates = json_obj[1]['$set']
             for k in updates:
                 v = updates[k]
@@ -202,12 +202,12 @@ class CreateAlterParser(Parser):
         return 'DROP TABLE %s;\n'%db_name
 
     def parse(self):
-        re_create_collection="""^db.createCollection\(("\D\w*")\)"""
-        re_insert_one = """^db.(\D\w*).insertOne\((\S+)\)"""
-        re_insert_many = """^db.(\D\w*).insertMany\((\S+)\)"""
-        re_update_many = """^db.(\D\w*).updateMany\((\S+)\)"""
-        re_create_index = """^db.(\D\w*).createIndex\((\S+)\)"""
-        re_drop = """^db.(\D\w*).drop\((\S*)\)"""
+        re_create_collection="""^db.createCollection\(("\D\w*")\);?"""
+        re_insert_one = """^db.(\D\w*).insertOne\((\S+)\);?"""
+        re_insert_many = """^db.(\D\w*).insertMany\((\S+)\);?"""
+        re_update_many = """^db.(\D\w*).updateMany\((\S+)\);?"""
+        re_create_index = """^db.(\D\w*).createIndex\((\S+)\);?"""
+        re_drop = """^db.(\D\w*).drop\((\S*)\);?"""
 
         #去掉字符串中的空格与换行
         string_need_parse = self.mongoString.replace(" ", "").replace("\n", "") 
@@ -230,7 +230,7 @@ class CreateAlterParser(Parser):
             m = re.search(re_drop, string_need_parse)
             return self.parseDrop(m.group(1), m.group(2))
         else:
-            raise ValueError("input error")
+            raise ValueError("re match failed:%s"%string_need_parse)
 
             
 
