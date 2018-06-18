@@ -4,11 +4,10 @@
 2. Convert MongoDB operation to sql
 ## How To Use
 ```python
-#use manage object to parse 
-#manage object is a factory object
-#call manage object class funtion parser to get parser
+#manager object is a factory object
+#call manager object class funtion parser to get parser
 #call parser function parse to get sql
-parser = ParserManager(mongoDB_string)
+parser = ParserManager.parser(mongoDB_string)
 sql_string = parse.parse()
 ```
 ### see example in example.py
