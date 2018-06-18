@@ -1,0 +1,5 @@
+DELETE FROM people WHERE (age <= 50 AND age > 25)
+DELETE FROM people WHERE age = 50
+DELETE FROM people WHERE age < 25
+DELETE FROM people WHERE status = "D"
+DELETE FROM people
