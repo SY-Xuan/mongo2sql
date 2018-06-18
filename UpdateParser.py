@@ -274,12 +274,12 @@ class UpdateParser(Parser):
             raise ValueError("re match failed:%s" % string_need_parse)
 
 
-with open("update_input.txt") as f:
-    with open("update_output.txt", "w") as wf:
-        for line in f.readlines():
-            if len(line.strip()) > 0:
-                parser = UpdateParser(line)
-                ss = parser.parse()
-                print(ss)
-                wf.write(ss)
-                wf.write("\n")
+# with open("update_input.txt") as f:
+#     with open("update_output.txt", "w") as wf:
+#         for line in f.readlines():
+#             if len(line.strip()) > 0:
+#                 parser = UpdateParser(line)
+#                 ss = parser.parse()
+#                 print(ss)
+#                 wf.write(ss)
+#                 wf.write("\n")

@@ -235,13 +235,13 @@ class CreateAlterParser(Parser):
             
 
 
-with open("mongodb_input_create_alter.txt") as f:
-    with open("output_create_alter.txt", "w") as wf:
-        for line in f.readlines():
-            if len(line.strip())>0:
-                parser = CreateAlterParser(line)
-                ss = parser.parse()
-                print(ss)
-                wf.write(ss)
-                wf.write("\n")
+# with open("mongodb_input_create_alter.txt") as f:
+#     with open("output_create_alter.txt", "w") as wf:
+#         for line in f.readlines():
+#             if len(line.strip())>0:
+#                 parser = CreateAlterParser(line)
+#                 ss = parser.parse()
+#                 print(ss)
+#                 wf.write(ss)
+#                 wf.write("\n")
     

@@ -1,0 +1,18 @@
+INSERT INTO inventory ( sizeuom ,status , field ,lastModified) VALUES ( "cm", "P", "value","True");
+Error: the input format in wrong.
+INSERT INTO inventory (item, sizeuom ,status , field ,lastModified) VALUES ("paper", "cm", "P", "value","True") ON CONFLICT(item) DO UPDATE SET  sizeuom = "cm",status = "P", field = "value";
+UPDATE inventory SET lastModified = CURRENT_DATE, sizeuom = "in",status = "P" WHERE qty < 50  LIMIT 1;
+UPDATE inventory SET lastModified = CURRENT_DATE, sizeuom = "in",status = "P";
+ALTER TABLE products DROP instock,DROP quantity;
+UPDATE inventory SET name = "desk" WHERE item = "paper"  LIMIT 1;
+UPDATE scores SET score = 20000,team = "ObservantBadgers" WHERE score < 20000  LIMIT 1;
+UPDATE scores SET points = points+(5)  WHERE name = "R.Stiles"  LIMIT 1 ;
+UPDATE people SET score = score+(1)  WHERE name = "Andy" ;
+UPDATE users SET lastModified = CURRENT_DATE WHERE _id = 1  LIMIT 1;
+Error: the input format in wrong.
+Error:field must be atomic
+UPDATE scores SET lowScore = 250 WHERE (lowScore > 250)  AND _id = 1  LIMIT 1;
+UPDATE scores SET highScore = 950 WHERE (highScore < 950)  AND _id = 1  LIMIT 1;
+UPDATE products SET price = price * (1.25),qty = qty * (2) WHERE _id = 1  LIMIT 1;
+ALTER TABLE students  RENAME nmae TO name;
+UPDATE products SET make = "xyz",model = "14Q3",quantity = 500 WHERE _id = 100  LIMIT 1;

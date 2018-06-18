@@ -51,8 +51,8 @@ class DeleteParser(Parser):
         sql = sql+ " FROM " + dbname
         #有WHERE部分的处理
         if len(where_dic.keys()) != 0:
-            print '#######'
-            print where_dic.keys()
+            
+            print(where_dic.keys())
             sql += " WHERE "
             for key in where_dic.keys():
                 #首先处理or情况
@@ -194,9 +194,4 @@ class DeleteParser(Parser):
 # print(parser.parse())
 # except ValueError as err:
 #     print(str(err))
-with open("mongodb_delete_input.txt") as f:
-    with open("delete_output.txt", "w") as wf:
-        for line in f.readlines():
-            parser = DeleteParser(line)
-            wf.write(parser.parse())
-            wf.write("\n")
+
