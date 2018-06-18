@@ -1,0 +1,26 @@
+db.inventory.updateMany({ },{$set: { "sizeuom": "cm", status: "P" },$setOnInsert: { lastModified: true },field:"value"},{upsert:true})
+db.products.update({},{ $setOnInsert: { quantity: "se", instock: "de" } },{upsert:true})
+
+db.inventory.updateOne({ item: "paper" },{$set: { "sizeuom": "cm", status: "P" },$setOnInsert: { lastModified: true },field:"value"},{upsert:true})
+
+db.inventory.update({ "qty": { $lt: 50 } },{ $set: { "sizeuom": "in", status: "P" }, $currentDate: { lastModified: true } })
+db.inventory.update({ },{ $set: { "sizeuom": "in", status: "P" }, $currentDate: { lastModified: true } },{multi:true})
+db.products.update({},{ $unset: { quantity: "", instock: "" } },{multi:true})
+
+
+db.inventory.replaceOne({ item: "paper" }, { name: "desk" })
+db.scores.findOneAndReplace({ "score" : { $lt : 20000 } }, { "team" : "Observant Badgers", "score" : 20000 })
+db.scores.findOneAndUpdate({ "name" : "R. Stiles" }, { $inc: { "points" : 5 } })
+db.people.findAndModify({query: { name: "Andy" },sort: { rating: 1 }, update: { $inc: { score: 1 } },upsert: true})
+
+db.users.update({ _id: 1 },{$currentDate: {lastModified: true}})
+db.products.update({ _id: 1 },{$setOnInsert: { defaultQty: 100 ,try:"sucess"}},{ upsert: true })
+
+db.products.update({ sku: "abc123" },{ $inc: { quantity: -2, "metrics.orders": 1 } })
+db.scores.update( { _id: 1 }, { $min: { lowScore: 250 } } )
+db.scores.update( { _id: 1 }, { $max: { highScore: 950 } } )
+db.products.update({ _id: 1 },{ $mul: { price: 1.25, qty: 2 } })
+db.students.updateMany( {}, { $rename: { "nmae": "name" } } )
+db.products.update({ _id: 100 },{ $set:{ quantity: 500,model: "14Q3",make: "xyz"}})
+
+
