@@ -7,6 +7,8 @@ class SelectParser(Parser):
        
 
     def parse(self):
+        return self.parse_no_sep() + ';'
+    def parse_no_sep(self):
         regular_expression = "^db.(([a-z]|[A-Z])+\w*.(find|aggregate|count|findOne|distinct))\(\S*\)(.(limit|explain|count|sort)\(\S*\))?(.skip\(\S\))?$"#使用正则检查是否有语法错误，可能需要修改
         string_need_parse = self.mongoString.replace(" ", "").replace("\n", "") #去掉字符串中的空格与换行
         print(string_need_parse)
@@ -44,7 +46,7 @@ class SelectParser(Parser):
                         skipnumber = int(string_array[4].split("(")[1][:-1])
                     except:
                         raise ValueError("skip para should be a number")
-                    return self.format_Sql(dbname, string_array[3]) + " SKIP " + str(skipnumber)
+                    return self.format_Sql(dbname, string_array[3]) + " OFFSET " + str(skipnumber)
                 else:
                     raise ValueError("cannot handle operation")
             
@@ -192,7 +194,7 @@ class SelectParser(Parser):
                                     
                                     if not isinstance(value, list):
                                         if isinstance(value, str):
-                                            sql += key + " = " + "\"" + value + "\""
+                                            sql += key + " = " + "'" + value + "'"
                                         else:
                                             sql += key + " = " + str(value)
                                     else:
@@ -216,7 +218,7 @@ class SelectParser(Parser):
                         value = where_dic[key]
                         if not isinstance(value, list):
                             if isinstance(value, str):
-                                sql += key + " = " + "\"" + value + "\""
+                                sql += key + " = " + "'" + value + "'"
                             else:
                                 sql += key + " = " + str(value)
                             
@@ -284,7 +286,7 @@ class SelectParser(Parser):
                         
                         if not isinstance(value, list):
                             if isinstance(value, str):
-                                sql += key + " = " + "\"" + value + "\""
+                                sql += key + " = " + "'" + value + "'"
                             else:
                                 sql += key + " = " + str(value)
                             
@@ -322,27 +324,27 @@ class SelectParser(Parser):
                                 for (key, value) in obj[objkey].items():
                                     if key == "$gt":
                                         if isinstance(value, str):
-                                            operation_list.append(" > " + "\"" + value + "\"")
+                                            operation_list.append(" > " + "'" + value + "'")
                                         else:
                                             operation_list.append(" > " + str(value))
                                     elif key == "$lt":
                                         if isinstance(value, str):
-                                            operation_list.append(" < " + "\"" + value + "\"")
+                                            operation_list.append(" < " + "'" + value + "'")
                                         else:
                                             operation_list.append(" < " + str(value))
                                     elif key == "$gte":
                                         if isinstance(value, str):
-                                            operation_list.append(" >= " + "\"" + value + "\"")
+                                            operation_list.append(" >= " + "'" + value + "'")
                                         else:
                                             operation_list.append(" >= " + str(value))
                                     elif key == "$lte":
                                         if isinstance(value, str):
-                                            operation_list.append(" <= " + "\"" + value + "\"")
+                                            operation_list.append(" <= " + "'" + value + "'")
                                         else:
                                             operation_list.append(" <= " + str(value))
                                     elif key == "$ne":
                                         if isinstance(value, str):
-                                            operation_list.append(" != " + "\"" + value + "\"")
+                                            operation_list.append(" != " + "'" + value + "'")
                                         else:
                                             operation_list.append(" != " + str(value))
                                     else:
@@ -358,27 +360,27 @@ class SelectParser(Parser):
                     for (objkey, value) in where_dic[key].items():
                         if objkey == "$gt":
                             if isinstance(value, str):
-                                operation_list.append(" > " + "\"" + value + "\"")
+                                operation_list.append(" > " + "'" + value + "'")
                             else:
                                 operation_list.append(" > " + str(value))
                         elif objkey == "$lt":
                             if isinstance(value, str):
-                                operation_list.append(" < " + "\"" + value + "\"")
+                                operation_list.append(" < " + "'" + value + "'")
                             else:
                                 operation_list.append(" < " + str(value))
                         elif objkey == "$gte":
                             if isinstance(value, str):
-                                operation_list.append(" >= " + "\"" + value + "\"")
+                                operation_list.append(" >= " + "'" + value + "'")
                             else:
                                 operation_list.append(" >= " + str(value))
                         elif objkey == "$lte":
                             if isinstance(value, str):
-                                operation_list.append(" <= " + "\"" + value + "\"")
+                                operation_list.append(" <= " + "'" + value + "'")
                             else:
                                 operation_list.append(" <= " + str(value))
                         elif objkey == "$ne":
                             if isinstance(value, str):
-                                operation_list.append(" != " + "\"" + value + "\"")
+                                operation_list.append(" != " + "'" + value + "'")
                             else:
                                 operation_list.append(" != " + str(value))
                         else:
