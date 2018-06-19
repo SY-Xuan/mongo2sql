@@ -19,7 +19,7 @@ pip install demjson
 try:
     parser = ParserManager.parser(mongoDB_string)
     sql_string = parser.parse()
-    #if any error happen the result is in the sql_string
+    #if no error happen the result is in the sql_string
 except ValueError as error:
     print(error)
 ```
