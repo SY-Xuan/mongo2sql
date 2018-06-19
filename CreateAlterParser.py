@@ -27,7 +27,7 @@ def mongo_type_name(v):
 
 class CreateAlterParser(Parser):
     def __init__(self, mongoString):
-        mongoString= re.sub(r'\s+new\s+Date\(\s*\)', '"$$$DATE"', mongoString)
+        mongoString= re.sub(r'\s*new\s*Date\(\s*\)', '"$$$DATE"', mongoString)
         Parser.__init__(self, mongoString)
        
 
@@ -95,7 +95,6 @@ class CreateAlterParser(Parser):
         statement_1 = self.generateCreateTable(db_name, cols_dict)
         statement_2 = self.generateInsertIntoOne(db_name, cols_dict)
         statement = statement_1 + statement_2
-        print( statement)
         return statement
 
     def parseInsertMany(self, db_name, arg):
@@ -175,13 +174,13 @@ class CreateAlterParser(Parser):
             final_statement += self.generateUpdate(db_name, condition, updates)
         if '$unset' in json_obj[1]:
             if len(condition) > 0 : # set = NULL
-                updates = json_obj[1]['$unset']
-                updates_null = dict()
-                for k in updates:
-                    updates_null[k]='$NULL'
-                final_statement += self.generateUpdate(db_name, 
-                        condition, updates_null)
-                #raise ValueError('cannot drop column with conditions')
+                #updates = json_obj[1]['$unset']
+                #updates_null = dict()
+                #for k in updates:
+                #    updates_null[k]='$NULL'
+                #final_statement += self.generateUpdate(db_name, 
+                #        condition, updates_null)
+                raise ValueError('cannot drop column with conditions')
             elif len(condition) == 0: # drop column
                 updates = json_obj[1]['$unset']
                 for k in updates:
@@ -246,13 +245,17 @@ class CreateAlterParser(Parser):
             
 
 
-# with open("mongodb_input_create_alter.txt") as f:
-#     with open("output_create_alter.txt", "w") as wf:
-#         for line in f.readlines():
-#             if len(line.strip())>0:
-#                 parser = CreateAlterParser(line)
-#                 ss = parser.parse()
-#                 print(ss)
-#                 wf.write(ss)
-#                 wf.write("\n")
+def main():
+    with open("mongodb_input_create_alter.txt") as f:
+        with open("output_create_alter.txt", "w") as wf:
+            for line in f.readlines():
+                if len(line.strip())>0:
+                    parser = CreateAlterParser(line)
+                    ss = parser.parse()
+                    print(ss)
+                    wf.write(ss)
+                    wf.write("\n")
+
+if __name__=='__main__':
+    main()
     
