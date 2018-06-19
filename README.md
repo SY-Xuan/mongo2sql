@@ -16,9 +16,16 @@ pip install demjson
 * call manager object static method **parser** to get parser
 * call parser method **parse** to get sql
 ```python
-
-parser = ParserManager.parser(mongoDB_string)
-sql_string = parser.parse()
+try:
+    parser = ParserManager.parser(mongoDB_string)
+    sql_string = parser.parse()
+    #if any error happen the result is in the sql_string
+except ValueError as error:
+    print(error)
 ```
 ## see example in example.py
+
+* there are many MangoDB command in the input file
+* in example.py read the inputfile and convert the command to the sql
+* the result is in the **output.txt**
 

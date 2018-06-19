@@ -1,9 +1,16 @@
+'''
+@the input files include many MongoDB operation command
+the result of convert is in the output.txt  
+
+'''
+
+
 from ParserManager import ParserManager
 import re
 # parser = CreateAlterParser("db.students.updateMany( {}, { $rename: { \"nmae\": \"name\" } } )")
 # print(parser.parse())
 with open("mongodb_input.txt") as f:
-    with open("output.txt", "a") as wf:
+    with open("output.txt", "w") as wf:
         for line in f.readlines():
             try:
                 parser = ParserManager.parser(line)
