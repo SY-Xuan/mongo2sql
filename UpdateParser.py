@@ -41,17 +41,14 @@ class UpdateParser(Parser):
                 for otherfield_value in otherfield_values:
                     set_fields.append(otherfield_value.split('=')[0])
                     set_values.append(otherfield_value.split('=')[1])
-        if len(update_list)==0:
+        if len(update_list) == 0:
             return "Error: the input format in wrong."
 
-        # 字符型赋值需要加双引号
-        for index in range(0, len(set_values)):
-            if set_values[index].isdigit() == False and '\"' not in set_values[index]:
-                set_values[index] = "\"" + set_values[index] + "\""
 
         # 提取condition中的field和value
         where_feilds = []
         where_values = []
+        result = ''
         if sql_where != 'TRUE':
             if '(' not in sql_where:
                 sql_where = '(' + sql_where + ')'
@@ -62,31 +59,39 @@ class UpdateParser(Parser):
                 if '' not in feild_value_list[0]:
                     where_feilds.append(feild_value_list[0][0])
                     where_values.append(feild_value_list[0][1])
-            return 'INSERT INTO {} ({},{}) VALUES ({},{}) ON CONFLICT({}) DO UPDATE SET {}'.format(collection, \
-                                                                                                   ','.join(where_feilds), \
-                                                                                                   ','.join(set_fields),
-                                                                                                   ','.join(where_values),
-                                                                                                   ','.join(set_values), \
-                                                                                                   ','.join(where_feilds),
-                                                                                                   ','.join(update_list))
+            result = 'INSERT INTO {} ({},{}) VALUES ({},{}) ON CONFLICT({}) DO UPDATE SET {}'.format(collection, \
+                                                                                                     ','.join(
+                                                                                                         where_feilds), \
+                                                                                                     ','.join(
+                                                                                                         set_fields),
+                                                                                                     ','.join(
+                                                                                                         where_values),
+                                                                                                     ','.join(
+                                                                                                         set_values), \
+                                                                                                     ','.join(
+                                                                                                         where_feilds),
+                                                                                                     ','.join(
+                                                                                                         update_list))
         else:
-            return 'INSERT INTO {} ({}) VALUES ({})'.format(collection,','.join(set_fields),','.join(set_values))
+            result = 'INSERT INTO {} ({}) VALUES ({})'.format(collection, ','.join(set_fields), ','.join(set_values))
+        return result.replace('\"', '\'')
 
     # 该函数解析parse_update_operators()返回的带有'SET'的操作,生成完整Sql语句
     def generateUpdate(self, collection, sql_set, sql_where=''):
+        result=''
         if sql_where != 'TRUE':
             if 'WHERE' in sql_set:
-                return "UPDATE {} {} AND {} ".format(collection, sql_set, sql_where)
+                result="UPDATE {} {} AND {} ".format(collection, sql_set, sql_where)
 
             else:
-                return "UPDATE {} {} WHERE {} ".format(collection, sql_set, sql_where)
+                result= "UPDATE {} {} WHERE {} ".format(collection, sql_set, sql_where)
         else:
-            return "UPDATE {} ".format(collection) + sql_set
+            result= "UPDATE {} ".format(collection) + sql_set
+        return result.replace('\"','\'')
 
     # 该函数针parse_update_operators()返回的带有'ALTER'的操作,生成完整Sql语句
     def generateAlter(self, collection, sql_set, sql_where=''):
-        return sql_set.replace('collection', collection)
-
+        return sql_set.replace('collection', collection).replace('\"','\'')
 
     # 解析updateOne()
     def parse_updateOne(self, collection, arg):
@@ -107,7 +112,7 @@ class UpdateParser(Parser):
             return self.generateUpdate(collection, sql_set, sql_where) + ' LIMIT 1 ;'
         elif len(args) == 3 and len(args[2]) == 1 and list(args[2])[0] == 'upsert' and args[2]['upsert'] is True \
                 and len(sql_set.split(',')) != 1:
-            return self.generateInsert(collection, sql_set, sql_where)+';'
+            return self.generateInsert(collection, sql_set, sql_where) + ';'
         else:
             return '''Error:the input format is wrong!'''
 
@@ -126,10 +131,10 @@ class UpdateParser(Parser):
         if 'ALTER' not in sql_set and 'INSERT' not in sql_set:
             return self.generateUpdate(collection, sql_set, sql_where) + ';'
         elif 'ALTER' in sql_set:
-            if sql_where=='TRUE':
-                return self.generateAlter(collection, sql_set, sql_where)+';'
+            if sql_where == 'TRUE':
+                return self.generateAlter(collection, sql_set, sql_where) + ';'
             else:
-                return "Error:when there is a $unset or $remove operator ,query should be empty."
+                return "Error:when there is a $unset or $rename operator ,query should be empty."
         elif 'INSERT' in sql_set and len(args) == 3 and len(args[2]) == 1 and list(args[2])[0] == 'upsert' and args[2][
             'upsert'] is True \
                 and len(sql_set.split(',')) != 1:
@@ -147,22 +152,22 @@ class UpdateParser(Parser):
 
         sql_set = parse_update_opeators(demjson.encode(operators))
         sql_where = parse_condition(conditions)
-        result=''
+        result = ''
         if 'Error' in sql_set:
             return sql_set
         if 'ALTER' not in sql_set and 'INSERT' not in sql_set:
             if len(args) == 3 and 'multi' in list(args[2]) and args[2][
                 'multi'] is True:
-                return  self.generateUpdate(collection, sql_set, sql_where)+';'
+                return self.generateUpdate(collection, sql_set, sql_where) + ';'
             else:
-                return  self.generateUpdate(collection, sql_set, sql_where)+' LIMIT 1;'
+                return self.generateUpdate(collection, sql_set, sql_where) + ' LIMIT 1;'
 
         elif 'ALTER' in sql_set and len(args) == 3 and 'multi' in list(args[2]) and args[2][
-                'multi'] is True:
-            if sql_where=='TRUE':
-                return self.generateAlter(collection, sql_set, sql_where)+';'
+            'multi'] is True:
+            if sql_where == 'TRUE':
+                return self.generateAlter(collection, sql_set, sql_where) + ';'
             else:
-                return "Error:when there is a $unset or $remove operator ,query should be empty."
+                return "Error:when there is a $unset or $rename operator ,query should be empty."
         elif 'INSERT' in sql_set and len(args) == 3 and 'upsert' in list(args[2]) and args[2][
             'upsert'] is True and len(sql_set.split(',')) != 1:
             return self.generateInsert(collection, sql_set, sql_where)
@@ -229,7 +234,7 @@ class UpdateParser(Parser):
             if 'Error' in sql_set:
                 return sql_set
             if "ALTER" in sql_set:
-                return '''Error:$unset and $remove cannot be used in findAndModify().'''
+                return '''Error:$unset and $rename cannot be used in findAndModify().'''
             elif 'Insert' in sql_set and upsert == 1:
                 result = self.generateInsert(collection, sql_set, sql_where)
             else:
@@ -274,12 +279,12 @@ class UpdateParser(Parser):
             raise ValueError("re match failed:%s" % string_need_parse)
 
 
-# with open("update_input.txt") as f:
-#     with open("update_output.txt", "w") as wf:
-#         for line in f.readlines():
-#             if len(line.strip()) > 0:
-#                 parser = UpdateParser(line)
-#                 ss = parser.parse()
-#                 print(ss)
-#                 wf.write(ss)
-#                 wf.write("\n")
+with open("update_input.txt") as f:
+    with open("update_output.txt", "w") as wf:
+        for line in f.readlines():
+            if len(line.strip()) > 0:
+                parser = UpdateParser(line)
+                ss = parser.parse()
+                print(ss)
+                wf.write(ss)
+                wf.write("\n")

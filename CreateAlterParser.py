@@ -9,11 +9,13 @@ from Mongo2sqlParser import Mongo2sqlParser as Parser
 import demjson
 import re
 from numbers import Number
-from parse_condition import parse_condition
+from parse_condition import parse_condition, format_mongodb_value
 
 def mongo_type_name(v):
-    if isinstance(v, Number):
-        return 'Number'
+    if isinstance(v, bool):
+        return 'boolean'
+    elif isinstance(v, Number):
+        return 'numeric'
     elif isinstance(v, str):
         if v=='$$$DATE':
             return 'DATE'
@@ -25,7 +27,7 @@ def mongo_type_name(v):
 
 class CreateAlterParser(Parser):
     def __init__(self, mongoString):
-        mongoString= re.sub(r'\s+new\s+Date\(\s*\)', '"$$$DATE"', mongoString)
+        mongoString= re.sub(r'\s*new\s*Date\(\s*\)', '"$$$DATE"', mongoString)
         Parser.__init__(self, mongoString)
        
 
@@ -38,11 +40,12 @@ class CreateAlterParser(Parser):
         cols_dict = document # {user_id:"abc123",age:55,status:"A"}
         if '_id' in cols_dict:
             del cols_dict['_id']
-        sql_create_args = ["id MEDIUMINT NOT NULL AUTO_INCREMENT"]
+        #sql_create_args = ["id MEDIUMINT NOT NULL AUTO_INCREMENT"]
+        sql_create_args = ["_id SERIAL PRIMARY KEY"]
         for k in cols_dict.keys():
             v=cols_dict[k]
             sql_create_args.append("%s %s" % (k, mongo_type_name(v)))
-        sql_create_args.append("PRIMARY KEY (id)")
+        #sql_create_args.append("PRIMARY KEY (id)")
         statement = "CREATE TABLE IF NOT EXISTS %s (\n    " % db_name
         statement += ',\n    '.join(sql_create_args)
         statement += '\n);\n'
@@ -52,13 +55,15 @@ class CreateAlterParser(Parser):
         statement = "INSERT INTO %s(" % db_name
         statement += ', '.join(document.keys()) + ')\n'
         statement += "    VALUES ("
-        statement += ', '.join(map(repr, document.values())) + ');\n'
+        statement += ', '.join(map(format_mongodb_value, \
+            document.values())) + ');\n'
         return statement
 
     def generateInsertIntoMany(self, db_name, documents):
         values = list()
         for document in documents:
-            values.append('(' + ', '.join(map(repr, document.values())) + ')')
+            values.append('(' + ', '.join(map(format_mongodb_value, \
+                    document.values())) + ')')
         statement = "INSERT INTO %s(" % db_name
         statement += ', '.join(document.keys()) + ') VALUES\n    '
         statement += ', '.join(values) + ';\n'
@@ -91,7 +96,6 @@ class CreateAlterParser(Parser):
         statement_1 = self.generateCreateTable(db_name, cols_dict)
         statement_2 = self.generateInsertIntoOne(db_name, cols_dict)
         statement = statement_1 + statement_2
-        print( statement)
         return statement
 
     def parseInsertMany(self, db_name, arg):
@@ -136,7 +140,7 @@ class CreateAlterParser(Parser):
         for col in updates:
             val = updates[col]
             if val != '$$$DATE':
-                new_val = repr(val)
+                new_val = format_mongodb_value(val)
             else:
                 new_val = 'CURRENT_DATE'
             set_cols.append( '%s=%s'%(col, new_val))
@@ -170,13 +174,20 @@ class CreateAlterParser(Parser):
                 final_statement += add_column_stat
             final_statement += self.generateUpdate(db_name, condition, updates)
         if '$unset' in json_obj[1]:
-            if len(condition) > 0 :
+            if len(condition) > 0 : # set = NULL
+                #updates = json_obj[1]['$unset']
+                #updates_null = dict()
+                #for k in updates:
+                #    updates_null[k]='$NULL'
+                #final_statement += self.generateUpdate(db_name, 
+                #        condition, updates_null)
                 raise ValueError('cannot drop column with conditions')
-            updates = json_obj[1]['$unset']
-            for k in updates:
-                v = updates[k]
-                add_column_stat = self.generateDropColumn(db_name, k)
-                final_statement += add_column_stat
+            elif len(condition) == 0: # drop column
+                updates = json_obj[1]['$unset']
+                for k in updates:
+                    v = updates[k]
+                    add_column_stat = self.generateDropColumn(db_name, k)
+                    final_statement += add_column_stat
         return final_statement
 
     def parseCreateIndex(self, db_name, arg):
@@ -235,13 +246,17 @@ class CreateAlterParser(Parser):
             
 
 
-# with open("mongodb_input_create_alter.txt") as f:
-#     with open("output_create_alter.txt", "w") as wf:
-#         for line in f.readlines():
-#             if len(line.strip())>0:
-#                 parser = CreateAlterParser(line)
-#                 ss = parser.parse()
-#                 print(ss)
-#                 wf.write(ss)
-#                 wf.write("\n")
+def main():
+    with open("mongodb_input_create_alter.txt") as f:
+        with open("output_create_alter.txt", "w") as wf:
+            for line in f.readlines():
+                if len(line.strip())>0:
+                    parser = CreateAlterParser(line)
+                    ss = parser.parse()
+                    print(ss)
+                    wf.write(ss)
+                    wf.write("\n")
+
+if __name__=='__main__':
+    main()
     

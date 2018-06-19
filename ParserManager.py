@@ -8,13 +8,11 @@ class ParserManager(object):
     @staticmethod
     def parser(string_need_parse):
         string_need_parse = string_need_parse.replace(" ", "").replace("\n", "")
-        special_string = re.sub(r'\s+new\s+Date\(\s*\)', '"$$$DATE"', string_need_parse)
-
         select_regular_expression = "^db.(([a-z]|[A-Z])+\w*.(find|aggregate|count|findOne|distinct))\(\S*\)(.(limit|explain|count|sort)\(\S*\))?(.skip\(\S\))?$"
         
         re_create_collection = """^db.createCollection\(("\D\w*")\);?"""
         special_one_regular_expression = """^db.(\D\w*).updateMany\((\S+)\);?"""
-        alter_regular_expression = """^db.(\D\w*).(insertOne|insertMany|createIndex|drop)\((\S+)\);?"""
+        alter_regular_expression = """^db.(\D\w*).(insertOne|insertMany|createIndex|drop)\((\S*)\);?"""
         update_regular_expression = """^db.(\D\w*).(updateOne|update|replaceOne|findOneAndReplace|findOneAndUpdate|findAndModify)\((\S+)\);?"""
         delete_regular_expression = "^db.(([a-z]|[A-Z])+\w*.(remove|deleteMany))\(\S*\)$"
         if re.match(select_regular_expression, string_need_parse) != None:
@@ -26,7 +24,7 @@ class ParserManager(object):
         elif re.match(delete_regular_expression, string_need_parse) != None:
             print("delete")
             return DeleteParser(string_need_parse)
-        elif re.match(alter_regular_expression, special_string) != None or re.match(re_create_collection, special_string) != None:
+        elif re.match(alter_regular_expression, string_need_parse) != None or re.match(re_create_collection, string_need_parse) != None:
             print("alter")
             return CreateAlterParser(string_need_parse)
         elif re.match(special_one_regular_expression, string_need_parse) != None:
@@ -42,6 +40,6 @@ class ParserManager(object):
                     raise ValueError(str(error))
                         
         else:
-            raise ValueError("input format error")
+            raise ValueError("input format error: %s"%string_need_parse)
 
 
