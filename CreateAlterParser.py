@@ -9,10 +9,12 @@ from Mongo2sqlParser import Mongo2sqlParser as Parser
 import demjson
 import re
 from numbers import Number
-from parse_condition import parse_condition
+from parse_condition import parse_condition, format_mongodb_value
 
 def mongo_type_name(v):
-    if isinstance(v, Number):
+    if isinstance(v, bool):
+        return 'boolean'
+    elif isinstance(v, Number):
         return 'Number'
     elif isinstance(v, str):
         if v=='$$$DATE':
@@ -52,13 +54,15 @@ class CreateAlterParser(Parser):
         statement = "INSERT INTO %s(" % db_name
         statement += ', '.join(document.keys()) + ')\n'
         statement += "    VALUES ("
-        statement += ', '.join(map(repr, document.values())) + ');\n'
+        statement += ', '.join(map(format_mongodb_value, \
+            document.values())) + ');\n'
         return statement
 
     def generateInsertIntoMany(self, db_name, documents):
         values = list()
         for document in documents:
-            values.append('(' + ', '.join(map(repr, document.values())) + ')')
+            values.append('(' + ', '.join(map(format_mongodb_value, \
+                    document.values())) + ')')
         statement = "INSERT INTO %s(" % db_name
         statement += ', '.join(document.keys()) + ') VALUES\n    '
         statement += ', '.join(values) + ';\n'
@@ -136,7 +140,7 @@ class CreateAlterParser(Parser):
         for col in updates:
             val = updates[col]
             if val != '$$$DATE':
-                new_val = repr(val)
+                new_val = format_mongodb_value(val)
             else:
                 new_val = 'CURRENT_DATE'
             set_cols.append( '%s=%s'%(col, new_val))
@@ -170,13 +174,20 @@ class CreateAlterParser(Parser):
                 final_statement += add_column_stat
             final_statement += self.generateUpdate(db_name, condition, updates)
         if '$unset' in json_obj[1]:
-            if len(condition) > 0 :
-                raise ValueError('cannot drop column with conditions')
-            updates = json_obj[1]['$unset']
-            for k in updates:
-                v = updates[k]
-                add_column_stat = self.generateDropColumn(db_name, k)
-                final_statement += add_column_stat
+            if len(condition) > 0 : # set = NULL
+                updates = json_obj[1]['$unset']
+                updates_null = dict()
+                for k in updates:
+                    updates_null[k]='$NULL'
+                final_statement += self.generateUpdate(db_name, 
+                        condition, updates_null)
+                #raise ValueError('cannot drop column with conditions')
+            elif len(condition) == 0: # drop column
+                updates = json_obj[1]['$unset']
+                for k in updates:
+                    v = updates[k]
+                    add_column_stat = self.generateDropColumn(db_name, k)
+                    final_statement += add_column_stat
         return final_statement
 
     def parseCreateIndex(self, db_name, arg):
