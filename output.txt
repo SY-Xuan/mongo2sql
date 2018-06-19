@@ -1,4 +1,3 @@
-SELECT * FROM people
 SELECT user_id, status, id FROM people
 SELECT user_id, status FROM people
 SELECT * FROM people WHERE status = "A"
@@ -22,3 +21,61 @@ SELECT * FROM people LIMIT 1
 SELECT * FROM people LIMIT 1
 SELECT * FROM people LIMIT 5 SKIP 10
 EXPLAIN SELECT * FROM people
+INSERT INTO inventory ( sizeuom ,status , field ,lastModified) VALUES ( "cm", "P", "value","True");
+Error: the input format in wrong.
+INSERT INTO inventory (item, sizeuom ,status , field ,lastModified) VALUES ("paper", "cm", "P", "value","True") ON CONFLICT(item) DO UPDATE SET  sizeuom = "cm",status = "P", field = "value";
+UPDATE inventory SET lastModified = CURRENT_DATE, sizeuom = "in",status = "P" WHERE qty < 50  LIMIT 1;
+UPDATE inventory SET lastModified = CURRENT_DATE, sizeuom = "in",status = "P";
+ALTER TABLE products DROP instock,DROP quantity;
+UPDATE inventory SET name = "desk" WHERE item = "paper"  LIMIT 1;
+UPDATE scores SET score = 20000,team = "ObservantBadgers" WHERE score < 20000  LIMIT 1;
+UPDATE scores SET points = points+(5)  WHERE name = "R.Stiles"  LIMIT 1 ;
+UPDATE people SET score = score+(1)  WHERE name = "Andy" ;
+UPDATE users SET lastModified = CURRENT_DATE WHERE _id = 1  LIMIT 1;
+Error: the input format in wrong.
+Error:field must be atomic
+UPDATE scores SET lowScore = 250 WHERE (lowScore > 250)  AND _id = 1  LIMIT 1;
+UPDATE scores SET highScore = 950 WHERE (highScore < 950)  AND _id = 1  LIMIT 1;
+UPDATE products SET price = price * (1.25),qty = qty * (2) WHERE _id = 1  LIMIT 1;
+ALTER TABLE students  RENAME nmae TO name;
+UPDATE products SET make = "xyz",model = "14Q3",quantity = 500 WHERE _id = 100  LIMIT 1;
+ALTER TABLE restaurant ADD COLUMN IF NOT EXISTS Review Number;
+ALTER TABLE restaurant ADD COLUMN IF NOT EXISTS need Varchar(30);
+UPDATE restaurant
+SET Review=True, need='yes'
+WHERE (violations > 4) OR (chefs <= 9);
+
+CREATE TABLE IF NOT EXISTS people (
+    id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    user_id Varchar(30),
+    age Number,
+    status Varchar(30),
+    PRIMARY KEY (id)
+);
+INSERT INTO people(user_id, age, status)
+    VALUES ('abc123', 55, 'A');
+
+CREATE TABLE IF NOT EXISTS people (
+    id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    user_id Varchar(30),
+    age Number,
+    status Varchar(30),
+    PRIMARY KEY (id)
+);
+INSERT INTO people(user_id, age, status) VALUES
+    ('abc123', 55, 'A'), ('a456', 40, 'B');
+
+
+UPDATE people SET join_date = 1;
+ALTER TABLE people DROP amount;
+CREATE INDEX idx_user_id_asc_age_desc
+ON people(user_id, age DESC);
+
+CREATE INDEX idx_user_id_asc
+ON people(user_id);
+
+DELETE FROM people WHERE (age > 25 AND age <= 50)
+DELETE FROM people WHERE age = 50
+DELETE FROM people WHERE age < 25
+DELETE FROM people WHERE status = "D"
+DELETE FROM people

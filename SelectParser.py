@@ -407,10 +407,5 @@ class SelectParser(Parser):
 # print(parser.parse())
 # except ValueError as err:
 #     print(str(err))
-with open("mongodb_input.txt") as f:
-    with open("output.txt", "w") as wf:
-        for line in f.readlines():
-            parser = SelectParser(line)
-            wf.write(parser.parse())
-            wf.write("\n")
+
     
