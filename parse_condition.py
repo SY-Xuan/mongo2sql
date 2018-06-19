@@ -10,7 +10,9 @@ from numbers import Number
 
 def format_mongodb_value(v):
     if type(v)==str:
-        return '"'+v+'"'
+        if v=='$NULL':
+            return 'NULL'
+        return "'"+v+"'"
     elif isinstance(v, Number):
         return str(v)
     elif isinstance(v, list):
@@ -67,10 +69,16 @@ def parse_condition(condition, col_name=''):
 
 def test_parse_condition():
     def pp(s):
+        print(s)
         print(parse_condition(demjson.decode(s)))
-    pp( '''{name : "John", age: 4}''' )
-    pp( '''{$or : [{height: {$gt: 10}}, {age: {$lte: 4}}] }''' )
-    pp( '''{name : {$in : ["John", "Peter"]}}''' )
+    #pp( '''{name : "John", age: 4}''' )
+    #pp( '''{$or : [{height: {$gt: 10}}, {age: {$lte: 4}}] }''' )
+    #pp( '''{name : {$in : ["John", "Peter"]}}''' )
+    or11 = '''{$or : [{height: {$gt: 10}}, {age: {$lte: 4}}] }''' 
+    and11 = '''{name : "John", age: 4}'''
+    and12 = '''{name : {$in : ["John", "Peter"]}} '''
+    or2= '''{$or: [%s, %s, %s]}'''%(or11, and11, and12)
+    pp(or2)
 
 if __name__=='__main__':
     test_parse_condition()
